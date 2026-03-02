@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -37,5 +37,14 @@ def create_app():
     app.register_blueprint(tasks)
 
     from app import models
+
+    from datetime import datetime
+    @app.context_processor
+    def inject_now():
+        return {'now': datetime.utcnow().date()}
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
 
     return app

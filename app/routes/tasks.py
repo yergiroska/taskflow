@@ -20,7 +20,10 @@ def index():
     if priority_filter:
         query = query.filter_by(priority=priority_filter)
 
-    user_tasks = query.order_by(Task.created_at.desc()).all()
+    #user_tasks = query.order_by(Task.created_at.desc()).all()
+    from sqlalchemy import asc, nulls_last
+
+    user_tasks = query.order_by(nulls_last(asc(Task.due_date))).all()
 
     # Estadísticas
     total = Task.query.filter_by(user_id=current_user.id).count()

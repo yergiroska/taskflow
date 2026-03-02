@@ -83,8 +83,21 @@
                         {% endif %} ms-1">
                         {{ task.status }}
                     </span>
-                    {% if task.due_date %}
+                    <!--{% if task.due_date %}
                         <p class="mt-2 mb-1"><small class="text-muted">📅 {{ task.due_date.strftime('%d/%m/%Y') }}</small></p>
+                    {% endif %}-->
+
+                    {% if task.due_date %}
+                        {% set today = now %}
+                        {% if task.due_date %}
+                        {% if task.due_date.date() < now and task.status != 'hecho' %}
+                            <p class="mt-2 mb-1"><small class="text-danger fw-bold">⚠️ Vencida: {{ task.due_date.strftime('%d/%m/%Y') }}</small></p>
+                        {% elif task.due_date.date() == now and task.status != 'hecho' %}
+                            <p class="mt-2 mb-1"><small class="text-warning fw-bold">⏰ Vence hoy: {{ task.due_date.strftime('%d/%m/%Y') }}</small></p>
+                        {% else %}
+                            <p class="mt-2 mb-1"><small class="text-muted">📅 {{ task.due_date.strftime('%d/%m/%Y') }}</small></p>
+                        {% endif %}
+                    {% endif %}
                     {% endif %}
                 </div>
                 <div class="card-footer d-flex justify-content-between">
