@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center border-secondary">
+            <div class="card-body">
+                <h3 class="card-title">{{ total }}</h3>
+                <p class="card-text text-muted">Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h3 class="card-title text-warning">{{ pendientes }}</h3>
+                <p class="card-text text-muted">Pendientes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <h3 class="card-title text-primary">{{ en_progreso }}</h3>
+                <p class="card-text text-muted">En Progreso</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h3 class="card-title text-success">{{ hechas }}</h3>
+                <p class="card-text text-muted">Hechas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Mis Tareas</h2>
+    <a href="{{ url_for('tasks.create') }}" class="btn btn-primary">+ Nueva Tarea</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="btn-group">
+            <a href="{{ url_for('tasks.index') }}" class="btn btn-outline-secondary {% if not status_filter %}active{% endif %}">Todas</a>
+            <a href="{{ url_for('tasks.index', status='pendiente') }}" class="btn btn-outline-warning {% if status_filter == 'pendiente' %}active{% endif %}">Pendientes</a>
+            <a href="{{ url_for('tasks.index', status='en progreso') }}" class="btn btn-outline-primary {% if status_filter == 'en progreso' %}active{% endif %}">En Progreso</a>
+            <a href="{{ url_for('tasks.index', status='hecho') }}" class="btn btn-outline-success {% if status_filter == 'hecho' %}active{% endif %}">Hechas</a>
+        </div>
+    </div>
+    <div class="col-md-3 ms-auto">
+        <select class="form-select" onchange="window.location.href='/?priority='+this.value">
+            <option value="" {% if not priority_filter %}selected{% endif %}>Todas las prioridades</option>
+            <option value="alta" {% if priority_filter == 'alta' %}selected{% endif %}>Alta</option>
+            <option value="media" {% if priority_filter == 'media' %}selected{% endif %}>Media</option>
+            <option value="baja" {% if priority_filter == 'baja' %}selected{% endif %}>Baja</option>
+        </select>
+    </div>
+</div>
+
+{% if tasks %}
+    <div class="row">
+        {% for task in tasks %}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text text-muted">{{ task.description }}</p>
+                    <span class="badge 
+                        {% if task.priority == 'alta' %}bg-danger
+                        {% elif task.priority == 'media' %}bg-warning text-dark
+                        {% else %}bg-secondary
+                        {% endif %}">
+                        {{ task.priority }}
+                    </span>
+                    <span class="badge 
+                        {% if task.status == 'hecho' %}bg-success
+                        {% elif task.status == 'en progreso' %}bg-primary
+                        {% else %}bg-light text-dark
+                        {% endif %} ms-1">
+                        {{ task.status }}
+                    </span>
+                    {% if task.due_date %}
+                        <p class="mt-2 mb-1"><small class="text-muted">📅 {{ task.due_date.strftime('%d/%m/%Y') }}</small></p>
+                    {% endif %}
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <form method="POST" action="{{ url_for('tasks.delete', task_id=task.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('¿Eliminar esta tarea?')">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center mt-5">
+        <h5 class="text-muted">No tienes tareas todavía.</h5>
+        <a href="{{ url_for('tasks.create') }}" class="btn btn-primary mt-3">Crear primera tarea</a>
+    </div>
+{% endif %}
+{% endblock %}
